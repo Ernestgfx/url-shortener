@@ -1,8 +1,8 @@
-# ⌁ ERNEST — URL Shortener
+# Ernest — URL Shortener
 
 > Make your links short, sharp, and shareable.
 
-A clean, feature-rich URL shortener built with vanilla HTML, CSS, and JavaScript. Paste any long URL, get a compact TinyURL link instantly — with QR code generation, persistent history, dark/light theming, and live stats.
+A feature-rich, animated URL shortener built with vanilla HTML, CSS, and JavaScript. Paste any long URL, get a compact TinyURL link instantly — with QR code generation, persistent history, live particle background, dark/light theming, and live stats.
 
 ---
 
@@ -16,14 +16,19 @@ A clean, feature-rich URL shortener built with vanilla HTML, CSS, and JavaScript
 
 - **Instant URL shortening** via the TinyURL API
 - **QR Code generation** — view and download a QR for any shortened link
-- **Persistent history** — your last 20 links are saved in `localStorage`
+- **Persistent history** — last 20 links saved in `localStorage`
 - **Duplicate detection** — cached results returned without re-hitting the API
 - **Copy / Open / QR** action buttons on every result
 - **Live stats** — total links, characters saved, and session count
 - **Dark / Light theme** — persisted across sessions
+- **Live particle canvas** — animated network of connected particles
+- **Cursor glow** — ambient glow that follows your mouse
+- **Typewriter hero** — animated headline cycles through phrases
+- **Scroll reveal** — elements animate in as they enter the viewport
+- **Button ripple effects** — tactile click feedback
 - **Character counter** on the input field
 - **Toast notifications** for all actions
-- **Loading state** with spinner while API call is in progress
+- **Loading spinner** while API call is in progress
 - **Keyboard shortcut** — press `Enter` to shorten
 - Fully **responsive** down to 320px
 
@@ -38,7 +43,7 @@ A clean, feature-rich URL shortener built with vanilla HTML, CSS, and JavaScript
 | Logic | Vanilla JavaScript (ES2020+) |
 | URL API | [TinyURL API](https://tinyurl.com/app/dev) |
 | QR Library | [qrcodejs](https://github.com/davidshimjs/qrcodejs) — loaded on demand via CDN |
-| Fonts | [Syne](https://fonts.google.com/specimen/Syne) + [Space Mono](https://fonts.google.com/specimen/Space+Mono) via Google Fonts |
+| Fonts | [Bebas Neue](https://fonts.google.com/specimen/Bebas+Neue) + [Manrope](https://fonts.google.com/specimen/Manrope) + [DM Mono](https://fonts.google.com/specimen/DM+Mono) via Google Fonts |
 | Storage | `localStorage` (no backend required) |
 | Hosting | GitHub Pages |
 
@@ -49,8 +54,8 @@ A clean, feature-rich URL shortener built with vanilla HTML, CSS, and JavaScript
 ```
 url-shortener/
 ├── index.html      # App markup and layout
-├── style.css       # All styling — theming, animations, responsive
-├── java.js         # App logic — API calls, history, QR, stats, theme
+├── style.css       # Styling — theming, animations, glassmorphism, responsive
+├── java.js         # App logic — particles, cursor, typewriter, API, QR, history
 └── README.md
 ```
 
@@ -79,7 +84,6 @@ open index.html
 ### Deploy to GitHub Pages
 
 ```bash
-# Push to main branch — GitHub Pages serves index.html automatically
 git add .
 git commit -m "deploy"
 git push origin main
@@ -91,8 +95,6 @@ Then go to **Settings → Pages → Source → main / root** in your GitHub repo
 
 ## 🔑 API Reference
 
-This project uses the **TinyURL v1 API**.
-
 | Detail | Value |
 |---|---|
 | Endpoint | `POST https://api.tinyurl.com/create` |
@@ -100,24 +102,14 @@ This project uses the **TinyURL v1 API**.
 | Payload | `{ "url": "<long_url>" }` |
 | Response field | `data.tiny_url` |
 
-To use your own key, replace the `API_KEY` value at the top of `java.js`:
+To use your own key, replace `API_KEY` at the top of `java.js`:
 
 ```js
 const API_KEY = "your_tinyurl_api_key_here";
 ```
 
-Get a free API key at [tinyurl.com/app/dev](https://tinyurl.com/app/dev).
+Get a free key at [tinyurl.com/app/dev](https://tinyurl.com/app/dev).
 
----
-
-## 📸 Preview
-
-| Dark Mode | Light Mode |
-|---|---|
-| Glassmorphism card with teal accents | Clean white surface with same layout |
-
-
----
 ## Ai Usages
 
 AI tools such as Cluade were used to assist with code structure, debugging, and feature suggestions. The generated code was reviewed, modified, and integrated manually. All functionality is understood and can be explained.
@@ -127,3 +119,7 @@ AI tools such as Cluade were used to assist with code structure, debugging, and 
 ## 📄 License
 
 MIT — free to use, modify, and distribute.
+
+---
+
+<p align="center">Built by <a href="https://github.com/ernestgfx">Ernest</a></p>
