@@ -120,7 +120,7 @@ Get a free API key at [tinyurl.com/app/dev](https://tinyurl.com/app/dev).
 ---
 ## Ai Usages
 
-AI tools such as ChatGPT were used to assist with code structure, debugging, and feature suggestions. The generated code was reviewed, modified, and integrated manually. All functionality is understood and can be explained.
+AI tools such as Cluade were used to assist with code structure, debugging, and feature suggestions. The generated code was reviewed, modified, and integrated manually. All functionality is understood and can be explained.
 
 ---
 
