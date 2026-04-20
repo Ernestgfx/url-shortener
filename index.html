@@ -1,369 +1,137 @@
 <!DOCTYPE html>
-<!--
-  ============================================================
-  FILE: index.html
-  PURPOSE: The structure (skeleton) of the ERNEST URL Shortener app.
-
-  This file defines WHAT elements exist on the page using HTML.
-  It does not contain visual styling (that's in style.css)
-  or any logic/interactivity (that's in java.js).
-
-  HOW THE THREE FILES CONNECT:
-  - index.html  → the bones  (what elements exist)
-  - style.css   → the skin   (how those elements look)
-  - java.js     → the brain  (what those elements do)
-
-  SECTIONS IN THIS FILE (top to bottom):
-  1. <head>        — Metadata, font imports, stylesheet link
-  2. Background    — Three decorative animated orbs (CSS-only)
-  3. Header        — Logo + dark/light mode toggle switch
-  4. Hero          — App headline and tagline
-  5. Card          — Main input box, action buttons, result display
-  6. QR Modal      — Hidden popup window for QR code display
-  7. History       — List of recently shortened URLs
-  8. Stats bar     — Link count, characters saved, session count
-  9. Footer        — Attribution text
-  ============================================================
--->
 <html lang="en">
 <head>
-  <!-- Declares the character encoding as UTF-8 so special characters
-       and symbols display correctly in all browsers -->
   <meta charset="UTF-8">
-
-  <!-- Ensures the page is displayed at the correct scale on mobile devices.
-       Without this, phones would zoom out to show a shrunken desktop layout. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- The text shown in the browser tab and bookmarks -->
   <title>ERNEST — URL Shortener</title>
-
-  <!-- Tells the browser to open a connection to Google Fonts early,
-       so the custom fonts start loading before the CSS requests them.
-       This reduces the delay before text appears in the correct font. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
-  <!-- Loads two Google Fonts used throughout the app:
-       - Space Mono (weights 400 & 700): a monospace font for URLs, labels, and counters
-       - Syne (weights 400, 600 & 800): a bold geometric font for headings and buttons -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-
-  <!-- Links the external CSS file that contains all the visual styling.
-       Must come before the closing </head> so styles are applied
-       before the page content is rendered on screen. -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ============================================================
-       ANIMATED BACKGROUND ORBS
-       Three large, blurred, coloured circle divs that sit behind
-       all content and slowly float to create an ambient effect.
-       They are purely decorative — all animation is handled in CSS.
-       - orb1 = teal   (positioned top-left, partially off-screen)
-       - orb2 = purple (positioned bottom-right, partially off-screen)
-       - orb3 = pink   (centered on the page)
-       "pointer-events: none" in CSS makes them unclickable.
-  ============================================================ -->
+  <!-- Animated background orbs -->
   <div class="bg-orb orb1"></div>
   <div class="bg-orb orb2"></div>
   <div class="bg-orb orb3"></div>
 
-  <!-- .main is the central column that wraps all visible content.
-       CSS uses max-width + margin: auto to center it horizontally,
-       and z-index: 1 to place it above the background orbs. -->
   <main class="main">
 
-    <!-- ============================================================
-         HEADER
-         The top bar of the app.
-         Contains the logo on the left and the theme toggle on the right.
-         CSS flexbox with justify-content: space-between pushes them apart.
-    ============================================================ -->
+    <!-- Header -->
     <header class="header">
-
-      <!-- LOGO GROUP: the ⌁ symbol and the "ERNEST" app name side by side -->
       <div class="logo">
-        <!-- Decorative symbol used as the brand icon mark -->
         <span class="logo-icon">⌁</span>
-        <!-- The app name displayed next to the icon -->
         <span class="logo-text">ERNEST</span>
       </div>
-
-      <!-- THEME TOGGLE SWITCH
-           Switches the app between dark mode and light mode.
-           Built using a hidden HTML checkbox + CSS-styled label.
-           When the checkbox state changes, java.js detects the "change" event
-           and adds/removes class names on <body> to apply the correct theme.
-           ☀ = light mode side (left) | ☾ = dark mode side (right) -->
       <div class="theme-toggle">
-        <!-- Sun icon on the left side of the toggle -->
         <span class="toggle-label">☀</span>
-
-        <!-- The <label> wraps the <input> — clicking anywhere on the label
-             toggles the checkbox, which triggers the "change" event in java.js.
-             The "for" attribute links this label to the input with id="mode". -->
         <label class="switch" for="mode">
-          <!-- The actual checkbox that stores the ON/OFF state.
-               Visually hidden by CSS but still functional — it's the real toggle.
-               java.js reads e.target.checked to know if it's ON or OFF. -->
           <input type="checkbox" id="mode">
-          <!-- The visual pill track + sliding knob, styled entirely in CSS.
-               CSS uses the :checked state of the input to move the knob. -->
           <span class="slider"></span>
         </label>
-
-        <!-- Moon icon on the right side of the toggle -->
         <span class="toggle-label">☾</span>
       </div>
     </header>
 
-    <!-- ============================================================
-         HERO SECTION
-         The first content the user sees. Introduces the app with:
-         - A short descriptive subtitle above the main headline
-         - The main headline with "Share." highlighted in teal accent color
-    ============================================================ -->
+    <!-- Hero -->
     <section class="hero">
-      <!-- Small all-caps subtitle tag above the headline -->
       <p class="hero-sub">Make your links short, sharp, and shareable</p>
-
-      <!-- Main app headline. The <br> tags create deliberate line breaks
-           so each word sits on its own line ("Shorten. / Share. / Track.").
-           The <span class="accent"> wraps "Share." to apply the teal color
-           defined in CSS with the .accent class. -->
       <h1 class="hero-title">Shorten.<br><span class="accent">Share.</span><br>Track.</h1>
     </section>
 
-    <!-- ============================================================
-         MAIN CARD
-         The interactive core of the app. Everything the user
-         directly interacts with lives inside this card:
-         - URL input row
-         - Shorten and Clear buttons
-         - Result display (where the short URL appears)
-         - Toast notification (temporary feedback messages)
-    ============================================================ -->
+    <!-- Card -->
     <section class="card">
 
-      <!-- INPUT ROW
-           A flex row containing:
-           - 🔗 icon on the left (visual hint this is a link field)
-           - The actual text input in the middle (takes all available space)
-           - A live character counter on the right (updated by java.js)
-           The whole wrapper div is styled as the visible "input box"
-           so the border and focus glow apply around all three elements. -->
+      <!-- Input Row -->
       <div class="input-wrapper">
-        <!-- Chain-link emoji — visual hint that this input is for URLs -->
         <span class="input-icon">🔗</span>
-
-        <!-- The URL text input field.
-             - type="url" hints to mobile browsers to show a URL-optimised keyboard
-             - id="get-url-input" lets java.js grab this element and read .value
-             - autocomplete="off" prevents the browser from showing saved URL suggestions -->
         <input class="url-input" type="url" id="get-url-input" placeholder="Paste your long URL here..." autocomplete="off">
-
-        <!-- Live character count — java.js updates this number as the user types.
-             Starts at 0 and reflects the current length of the input value. -->
         <span class="char-count" id="char-count">0</span>
       </div>
 
-      <!-- ACTION BUTTONS ROW
-           Contains the primary and secondary action buttons side by side. -->
+      <!-- Actions -->
       <div class="actions">
-
-        <!-- PRIMARY "SHORTEN" BUTTON
-             java.js attaches a click listener to id="shorten-btn".
-             Inside it, three child elements handle different visual states:
-             - .btn-text  → "Shorten" label (shown by default)
-             - .btn-icon  → "→" arrow (shown by default)
-             - .btn-loader → animated spinner (shown while API call is in progress) -->
         <button class="btn btn-primary" id="shorten-btn">
-          <span class="btn-text">Shorten</span>   <!-- Default label text -->
-          <span class="btn-icon">→</span>          <!-- Arrow icon next to the label -->
-          <!-- The loading spinner — hidden by default via CSS.
-               java.js adds the "loading" class to the button to show it
-               and hide the text/icon while waiting for the API response. -->
+          <span class="btn-text">Shorten</span>
+          <span class="btn-icon">→</span>
           <span class="btn-loader" id="btn-loader"></span>
         </button>
-
-        <!-- SECONDARY "CLEAR" BUTTON
-             java.js listens for a click on id="clear-btn" and resets
-             the input field and result box to their empty/default states. -->
         <button class="btn btn-ghost" id="clear-btn">Clear</button>
       </div>
 
-      <!-- RESULT BOX
-           Displays the shortened URL after a successful API call.
-           Divided into two sides using CSS flexbox:
-           - Left (.result-left)   → "SHORTENED URL" label + the short URL link
-           - Right (.result-actions) → Copy, QR, and Open action buttons
-           java.js updates the <a> tag's text and href when the API responds. -->
+      <!-- Result -->
       <div class="result-box" id="result-box">
-
-        <!-- LEFT SIDE: the label and the result URL -->
         <div class="result-left">
-          <!-- Small uppercase label above the URL -->
           <span class="result-label">SHORTENED URL</span>
-
-          <!-- The anchor tag that shows the shortened URL.
-               id="result-text" lets java.js find and update both its
-               .textContent (visible text) and .href (link destination).
-               Starts with a dash "—" as a placeholder before any URL is generated.
-               target="_blank" opens the link in a new browser tab. -->
           <a class="result-url" id="result-text" href="#" target="_blank">—</a>
         </div>
-
-        <!-- RIGHT SIDE: three action buttons for the result URL -->
         <div class="result-actions">
-
-          <!-- COPY BUTTON: java.js listens on id="copy-btn".
-               Uses the browser's Clipboard API to copy the short URL text. -->
           <button class="icon-btn" id="copy-btn" title="Copy URL">
-            <!-- SVG icon: two overlapping rectangles (the "copy" symbol) -->
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span>Copy</span>
           </button>
-
-          <!-- QR CODE BUTTON: java.js listens on id="qr-btn".
-               Clicking this opens the QR modal popup (below) and
-               generates a QR code image from the shortened URL. -->
           <button class="icon-btn" id="qr-btn" title="QR Code">
-            <!-- SVG icon: a simplified representation of a QR code grid -->
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="5" y="5" width="3" height="3" fill="currentColor"/><rect x="16" y="5" width="3" height="3" fill="currentColor"/><rect x="5" y="16" width="3" height="3" fill="currentColor"/></svg>
             <span>QR</span>
           </button>
-
-          <!-- OPEN BUTTON: java.js listens on id="open-btn".
-               Clicking this navigates directly to the shortened URL in a new tab. -->
           <button class="icon-btn" id="open-btn" title="Open URL">
-            <!-- SVG icon: an arrow exiting a box (the "external link" symbol) -->
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             <span>Open</span>
           </button>
         </div>
       </div>
 
-      <!-- TOAST NOTIFICATION
-           A small pill-shaped message that briefly appears at the bottom
-           of the screen to confirm actions (e.g. "Copied!" or "Invalid URL").
-           Hidden by default (opacity: 0 in CSS).
-           java.js sets its text content and toggles the "show" CSS class
-           to trigger the fade-in animation, then removes "show" after a delay. -->
+      <!-- Toast -->
       <div class="toast" id="toast"></div>
 
     </section>
 
-    <!-- ============================================================
-         QR CODE MODAL
-         A full-screen darkened overlay with a centered popup box.
-         Hidden by default (opacity: 0, pointer-events: none in CSS).
-         java.js adds the "show" class to make it visible when the
-         QR button is clicked.
-         The QR code image itself is dynamically generated by
-         a QR code library (qrcode.js) and injected into #qr-container.
-    ============================================================ -->
+    <!-- QR Modal -->
     <div class="modal-overlay" id="qr-modal">
       <div class="modal">
-
-        <!-- Modal top bar: title text on the left, close button on the right -->
         <div class="modal-header">
           <span>QR Code</span>
-          <!-- The ✕ close button. java.js listens for a click on id="modal-close"
-               and removes the "show" class from the overlay to hide the modal. -->
           <button class="modal-close" id="modal-close">✕</button>
         </div>
-
-        <!-- The div where the QR code will be rendered.
-             A QR code library creates a <canvas> element and injects it here.
-             White background in CSS is required so the QR code is scannable. -->
         <div id="qr-container" class="qr-container"></div>
-
-        <!-- Displays the shortened URL as readable text below the QR image.
-             java.js sets this text when the modal opens. -->
         <p class="modal-url" id="modal-url"></p>
-
-        <!-- Download button: java.js handles the click and triggers a
-             download of the QR code canvas as a PNG image file. -->
         <button class="btn btn-primary" id="download-qr">Download QR</button>
       </div>
     </div>
 
-    <!-- ============================================================
-         HISTORY SECTION
-         Shows a list of all URLs shortened during this session.
-         The list items are dynamically created and added by java.js.
-         When the list is empty, the #history-empty message is shown.
-         java.js hides that message once the first entry is added.
-    ============================================================ -->
+    <!-- History -->
     <section class="history-section" id="history-section">
-
-      <!-- Section header row: title on left, "Clear All" button on right -->
       <div class="history-header">
         <h2 class="history-title">Recent Links</h2>
-
-        <!-- "Clear All" button: java.js listens on id="clear-history-btn"
-             and removes all history entries + resets the stats counters. -->
         <button class="btn btn-ghost btn-sm" id="clear-history-btn">Clear All</button>
       </div>
-
-      <!-- The container where java.js inserts history entry divs.
-           Each entry is created with document.createElement() and
-           appended here using insertAdjacentElement("beforeend", ...). -->
       <div class="history-list" id="history-list"></div>
-
-      <!-- Empty state placeholder — visible when no URLs have been shortened yet.
-           java.js hides this element (display: none) after the first URL is added. -->
       <p class="history-empty" id="history-empty">No links shortened yet. Go ahead — paste your first URL!</p>
     </section>
 
-    <!-- ============================================================
-         STATS BAR
-         Three counter numbers in a horizontal row:
-         - "Links"       → total URLs shortened (persists via localStorage)
-         - "Chars saved" → total characters saved (original length − short length)
-         - "This session"→ URLs shortened since the page was opened
-         java.js updates the text content of each .stat-num span after
-         every successful URL shortening.
-    ============================================================ -->
+    <!-- Stats -->
     <section class="stats-bar">
-      <!-- Total links counter -->
       <div class="stat">
-        <!-- java.js finds this by id="stat-count" and updates its text -->
         <span class="stat-num" id="stat-count">0</span>
         <span class="stat-label">Links</span>
       </div>
-
-      <!-- Thin vertical divider line between stats -->
       <div class="stat-divider"></div>
-
-      <!-- Characters saved counter -->
       <div class="stat">
-        <!-- java.js finds this by id="stat-saved" and updates its text -->
         <span class="stat-num" id="stat-saved">0</span>
         <span class="stat-label">Chars saved</span>
       </div>
-
-      <!-- Thin vertical divider line between stats -->
       <div class="stat-divider"></div>
-
-      <!-- This-session counter -->
       <div class="stat">
-        <!-- java.js finds this by id="stat-session" and updates its text -->
         <span class="stat-num" id="stat-session">0</span>
         <span class="stat-label">This session</span>
       </div>
     </section>
 
-    <!-- Footer credit line. The <span class="accent"> gives the ⌁ symbol its teal color. -->
     <footer class="footer">Built By <span class="accent">⌁</span> ERNEST</footer>
   </main>
 
-  <!-- The <script> tag is placed here at the VERY END of <body> — not in <head>.
-       This is intentional: the browser reads HTML top to bottom.
-       If java.js loaded in <head>, it would run before any HTML elements exist,
-       and every document.getElementById() call would return null (nothing found).
-       Placing it last ensures all elements are in the DOM before the script runs. -->
+  <!-- FIX 11: QR code library — must load before java.js so the QRCode class exists -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="java.js"></script>
 </body>
 </html>
