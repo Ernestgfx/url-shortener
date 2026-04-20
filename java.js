@@ -1,261 +1,298 @@
-// ── Element references ──────────────────────────────────────
-let form = document.getElementById("form")
-let getUrl = document.getElementById("get-url-input")
-let getUrlBtn = document.getElementById("shorten-btn")
-let clearBtn = document.getElementById("clear-btn")
-let showsUrl = document.getElementById("result-text")
-let copyUrlBtn = document.getElementById("copy-btn")
-let showUrlHistory = document.getElementById("history-list")
-let toggleMode = document.getElementById("mode")
-let section = document.getElementById("section")
-let body = document.getElementById("body")
-let createHistoryList = document.createElement("div")
+// === DOM REFS ===
+const urlInput     = document.getElementById("get-url-input");
+const shortenBtn   = document.getElementById("shorten-btn");
+const clearBtn     = document.getElementById("clear-btn");
+const resultText   = document.getElementById("result-text");
+const resultBox    = document.getElementById("result-box");
+const copyBtn      = document.getElementById("copy-btn");
+const qrBtn        = document.getElementById("qr-btn");
+const openBtn      = document.getElementById("open-btn");
+const historyList  = document.getElementById("history-list");
+const historyEmpty = document.getElementById("history-empty");
+const clearHistBtn = document.getElementById("clear-history-btn");
+const modeToggle   = document.getElementById("mode");
+const toast        = document.getElementById("toast");
+const charCount    = document.getElementById("char-count");
+const qrModal      = document.getElementById("qr-modal");
+const modalClose   = document.getElementById("modal-close");
+const qrContainer  = document.getElementById("qr-container");
+const modalUrl     = document.getElementById("modal-url");
+const downloadQr   = document.getElementById("download-qr");
+const statCount    = document.getElementById("stat-count");
+const statSaved    = document.getElementById("stat-saved");
+const statSession  = document.getElementById("stat-session");
 
-// FIX 6: grab char counter + stats elements that were never connected to JS
-let charCount = document.getElementById("char-count")
-let statCount = document.getElementById("stat-count")
-let statSaved = document.getElementById("stat-saved")
-let statSession = document.getElementById("stat-session")
+// === STATE ===
+const API_KEY = "uBgmdCNHmGnuK3gZabDrG02TXoCGGDlpWIfnsdL2jOB61sHGu6F2hTAkLunH";
+let history    = JSON.parse(localStorage.getItem("shrtnr_history") || "[]");
+let sessionCount = 0;
+let currentShortUrl = "";
+let qrScript = null;
 
-// FIX 1/3/4: grab QR modal elements that had no listeners
-let qrBtn = document.getElementById("qr-btn")
-let qrModal = document.getElementById("qr-modal")
-let modalClose = document.getElementById("modal-close")
-let modalUrl = document.getElementById("modal-url")
-let qrContainer = document.getElementById("qr-container")
-let downloadQrBtn = document.getElementById("download-qr")
-
-// FIX 2: grab the Open button that had no listener
-let openBtn = document.getElementById("open-btn")
-
-// FIX 5: grab Clear History button that had no listener
-let clearHistoryBtn = document.getElementById("clear-history-btn")
-
-// FIX 7: grab the history empty message so we can show/hide it
-let historyEmpty = document.getElementById("history-empty")
-
-let url_array = []
-let api = "uBgmdCNHmGnuK3gZabDrG02TXoCGGDlpWIfnsdL2jOB61sHGu6F2hTAkLunH"
-
-// FIX 7: counters for the stats bar
-let sessionCount = 0
-let totalCount = 0
-let totalSaved = 0
-
-let showHistory = (url) => {
-
-    let createElementA = document.createElement("a")
-    
-    if(url_array.includes(url)) {
-        createElementA.textContent = `Url already exist`
-        createElementA.href = null
-    } else {
-        createElementA.textContent = `${url}`
-        createElementA.href = url
-    }
-    createElementA.target = "_blank"
-
-    createHistoryList.classList.add("history-list")
-    createHistoryList.appendChild(createElementA)
-    showUrlHistory.insertAdjacentElement("beforeend", createHistoryList)
-
-    // FIX 7: hide the "no links yet" empty state message
-    historyEmpty.style.display = "none"
+// === UTILS ===
+function showToast(msg, duration = 2200) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => toast.classList.remove("show"), duration);
 }
 
-let showUrl = (shortUrl, originalUrl) => {
-
-    showHistory(shortUrl)
-    url_array.push(shortUrl)
-    showsUrl.textContent = `${shortUrl}`
-
-    // FIX 8: set href so the result link actually navigates when clicked
-    showsUrl.href = shortUrl
-
-    // FIX 7: update all three stats counters
-    sessionCount++
-    totalCount++
-    totalSaved += (originalUrl.length - shortUrl.length)
-    statSession.textContent = sessionCount
-    statCount.textContent = totalCount
-    statSaved.textContent = totalSaved > 0 ? totalSaved : 0
+function formatTime(ts) {
+  const now = Date.now();
+  const diff = (now - ts) / 1000;
+  if (diff < 60)   return "just now";
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400)return `${Math.floor(diff/3600)}h ago`;
+  return new Date(ts).toLocaleDateString();
 }
 
-let fetchUrl = (userUrl) => {
-
-    fetch(`https://api.tinyurl.com/create`, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${api}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            url: `${userUrl}`
-        })
-    })
-    .then((response) => {
-        if(!response.ok) {
-            throw new Error("api limit is full")
-        }
-        return response.json()
-    })
-    .then((data) => {
-        console.log(data.data.tiny_url);
-        // FIX 7: pass userUrl so chars-saved can be calculated
-        showUrl(data.data.tiny_url, userUrl)
-    })
-    .catch((error) => {
-        showsUrl.textContent = "Please enter a valid url"
-        throw new Error("Failed to fetch data", error)
-    })
+function animateNum(el, target) {
+  const start = parseInt(el.textContent) || 0;
+  const diff  = target - start;
+  const dur   = 500;
+  const t0    = performance.now();
+  function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    el.textContent = Math.round(start + diff * p);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
-getUrlBtn.addEventListener("click", (e) => {
-    e.preventDefault()
+function updateStats() {
+  animateNum(statCount,   history.length);
+  animateNum(statSession, sessionCount);
+  const saved = history.reduce((acc, item) => {
+    return acc + Math.max(0, item.original.length - item.short.length);
+  }, 0);
+  animateNum(statSaved, saved);
+}
 
-    let convertUrl = getUrl.value
+// === CHAR COUNTER ===
+urlInput.addEventListener("input", () => {
+  charCount.textContent = urlInput.value.length;
+});
 
-    fetchUrl(convertUrl)
-})
+// === THEME ===
+const savedTheme = localStorage.getItem("shrtnr_theme");
+if (savedTheme === "light") {
+  document.body.classList.add("light");
+  modeToggle.checked = true;
+}
 
-copyUrlBtn.addEventListener("click", (e) => {
-    e.preventDefault()
+modeToggle.addEventListener("change", () => {
+  document.body.classList.toggle("light", modeToggle.checked);
+  localStorage.setItem("shrtnr_theme", modeToggle.checked ? "light" : "dark");
+});
 
-    // FIX 9: the real HTML default is "—", not "Your shortened URL will appear here"
-    if(showsUrl.textContent === "—" || showsUrl.textContent === "Please enter a valid url") {
-        copyUrlBtn.textContent = "Generate url first"
-        copyUrlBtn.style.width = "100%"
-    } else {
-        copyUrlBtn.textContent = "Copied"
-    }
-    
-    
-    setTimeout(() => {
-        copyUrlBtn.textContent = "Copy"
-        copyUrlBtn.style.width = "65%"
-    }, 2000)
+// === FETCH URL ===
+async function fetchShortUrl(longUrl) {
+  const response = await fetch("https://api.tinyurl.com/create", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ url: longUrl })
+  });
+  if (!response.ok) throw new Error(`API error: ${response.status}`);
+  const data = await response.json();
+  return data.data.tiny_url;
+}
 
-    navigator.clipboard.writeText(showsUrl.textContent)
-})
+// === SHORTEN ===
+async function handleShorten(e) {
+  e.preventDefault();
+  const rawUrl = urlInput.value.trim();
+  if (!rawUrl) return;
 
-clearBtn.addEventListener("click", (e) => {
-    e.preventDefault()
+  // Validate
+  try { new URL(rawUrl); } catch {
+    showToast("⚠ Please enter a valid URL");
+    urlInput.focus();
+    return;
+  }
 
-    getUrl.value = ""
-    // FIX 9: reset to "—" to match the actual HTML default, and clear the href
-    showsUrl.textContent = "—"
-    showsUrl.href = "#"
+  // Check duplicate in history
+  const existing = history.find(h => h.original === rawUrl);
+  if (existing) {
+    setResult(existing.short);
+    showToast("↩ Already shortened — showing cached result");
+    return;
+  }
 
-})
+  // Loading state
+  shortenBtn.classList.add("loading");
+  shortenBtn.disabled = true;
 
-// FIX 10: body/section had no IDs in the HTML so getElementById returned null
-// Use document.body directly instead
-toggleMode.addEventListener("change", (e) => {
-    e.preventDefault()
+  try {
+    const shortUrl = await fetchShortUrl(rawUrl);
+    setResult(shortUrl);
+    addToHistory(rawUrl, shortUrl);
+    sessionCount++;
+    updateStats();
+    showToast("✓ URL shortened!");
+  } catch (err) {
+    showToast("✗ Failed — check your URL or try again");
+    console.error(err);
+  } finally {
+    shortenBtn.classList.remove("loading");
+    shortenBtn.disabled = false;
+  }
+}
 
-    if(e.target.checked) {
-        document.body.classList.add("dark-mode")
-        document.body.classList.remove("light-mode")
-    } else {
-        document.body.classList.add("light-mode")
-        document.body.classList.remove("dark-mode")
-    }
+function setResult(shortUrl) {
+  currentShortUrl = shortUrl;
+  resultText.textContent = shortUrl;
+  resultText.href = shortUrl;
+  resultText.classList.remove("placeholder");
+  resultBox.classList.add("has-url");
+}
 
-})
+// === HISTORY ===
+function addToHistory(original, short) {
+  const entry = { original, short, ts: Date.now() };
+  history.unshift(entry);
+  if (history.length > 20) history.pop();
+  localStorage.setItem("shrtnr_history", JSON.stringify(history));
+  renderHistory();
+}
 
-// FIX 6: live character counter — updates the char count on every keystroke
-getUrl.addEventListener("input", () => {
-    charCount.textContent = getUrl.value.length
-})
+function renderHistory() {
+  historyList.innerHTML = "";
+  if (history.length === 0) {
+    historyEmpty.style.display = "block";
+    return;
+  }
+  historyEmpty.style.display = "none";
 
-// FIX 1: QR button — generate and show the QR code modal
-qrBtn.addEventListener("click", (e) => {
-    e.preventDefault()
+  history.forEach((item, i) => {
+    const el = document.createElement("div");
+    el.className = "history-item";
+    el.style.animationDelay = `${i * 0.04}s`;
+    el.innerHTML = `
+      <span class="history-item-icon">⌁</span>
+      <div class="history-item-content">
+        <a class="history-short" href="${item.short}" target="_blank">${item.short}</a>
+        <span class="history-original">${item.original}</span>
+      </div>
+      <span class="history-time">${formatTime(item.ts)}</span>
+      <button class="history-copy" title="Copy" data-url="${item.short}">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
+    `;
+    el.querySelector(".history-copy").addEventListener("click", function () {
+      navigator.clipboard.writeText(this.dataset.url).then(() => showToast("✓ Copied!"));
+    });
+    historyList.appendChild(el);
+  });
+}
 
-    const url = showsUrl.textContent
+clearHistBtn.addEventListener("click", () => {
+  if (history.length === 0) return;
+  history = [];
+  localStorage.removeItem("shrtnr_history");
+  renderHistory();
+  updateStats();
+  showToast("History cleared");
+});
 
-    if(url === "—" || url === "Please enter a valid url") return
+// === COPY ===
+copyBtn.addEventListener("click", () => {
+  if (!currentShortUrl) {
+    showToast("⚠ Shorten a URL first!");
+    return;
+  }
+  navigator.clipboard.writeText(currentShortUrl).then(() => {
+    showToast("✓ Copied to clipboard!");
+  });
+});
 
-    // Clear any previous QR code before generating a new one
-    qrContainer.innerHTML = ""
+// === OPEN ===
+openBtn.addEventListener("click", () => {
+  if (!currentShortUrl) {
+    showToast("⚠ Nothing to open yet");
+    return;
+  }
+  window.open(currentShortUrl, "_blank");
+});
 
-    // Generate QR code using the qrcode.js library (added to index.html)
+// === CLEAR ===
+clearBtn.addEventListener("click", () => {
+  urlInput.value = "";
+  charCount.textContent = "0";
+  currentShortUrl = "";
+  resultText.textContent = "—";
+  resultText.href = "#";
+  resultText.classList.add("placeholder");
+  resultBox.classList.remove("has-url");
+  urlInput.focus();
+});
+
+// === QR CODE ===
+function loadQrLib() {
+  return new Promise((resolve, reject) => {
+    if (window.QRCode) { resolve(); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+qrBtn.addEventListener("click", async () => {
+  if (!currentShortUrl) {
+    showToast("⚠ Shorten a URL first!");
+    return;
+  }
+  try {
+    await loadQrLib();
+    qrContainer.innerHTML = "";
     new QRCode(qrContainer, {
-        text: url,
-        width: 200,
-        height: 200
-    })
+      text: currentShortUrl,
+      width: 220,
+      height: 220,
+      colorDark: "#0a0a12",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    modalUrl.textContent = currentShortUrl;
+    qrModal.classList.add("show");
+  } catch {
+    showToast("✗ Could not load QR library");
+  }
+});
 
-    modalUrl.textContent = url
-    qrModal.classList.add("show")
-})
+modalClose.addEventListener("click", () => qrModal.classList.remove("show"));
+qrModal.addEventListener("click", (e) => { if (e.target === qrModal) qrModal.classList.remove("show"); });
 
-// FIX 4: close button hides the modal
-modalClose.addEventListener("click", () => {
-    qrModal.classList.remove("show")
-})
+downloadQr.addEventListener("click", () => {
+  const canvas = qrContainer.querySelector("canvas");
+  if (!canvas) return;
+  const link = document.createElement("a");
+  link.download = "shrtnr-qr.png";
+  link.href = canvas.toDataURL();
+  link.click();
+  showToast("✓ QR downloaded!");
+});
 
-// Also close when clicking the dark backdrop outside the modal box
-qrModal.addEventListener("click", (e) => {
-    if(e.target === qrModal) {
-        qrModal.classList.remove("show")
-    }
-})
+// === KEYBOARD SHORTCUT: Enter to shorten ===
+urlInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleShorten(e);
+  }
+});
 
-// FIX 3: download button — saves the QR canvas as a PNG file
-downloadQrBtn.addEventListener("click", () => {
-    const canvas = qrContainer.querySelector("canvas")
-    if(!canvas) return
+// === FORM SUBMIT ===
+// Using the shorten button directly (no form needed for event)
+shortenBtn.addEventListener("click", handleShorten);
 
-    const link = document.createElement("a")
-    link.download = "qrcode.png"
-    link.href = canvas.toDataURL("image/png")
-    link.click()
-})
-
-// FIX 2: open button — opens the shortened URL in a new tab
-openBtn.addEventListener("click", (e) => {
-    e.preventDefault()
-
-    const url = showsUrl.textContent
-
-    if(url === "—" || url === "Please enter a valid url") return
-
-    window.open(url, "_blank")
-})
-
-// FIX 5: clear history — wipes list, resets duplicate tracker and all stats
-clearHistoryBtn.addEventListener("click", (e) => {
-    e.preventDefault()
-
-    showUrlHistory.innerHTML = ""
-    url_array = []
-    createHistoryList = document.createElement("div")
-    historyEmpty.style.display = ""
-    sessionCount = 0
-    totalCount = 0
-    totalSaved = 0
-    statCount.textContent = 0
-    statSaved.textContent = 0
-    statSession.textContent = 0
-})
-
-
-// toggleMode.addEventListener("change", (e) => {
-//     e.preventDefault()
-
-//     if(e.target.checked) {
-//         body.classList.add("dark-mode")
-//         body.classList.remove("light-mode")
-//         section.style.backgroundColor = "black"
-//         section.style.color = "white"
-//         section.style.border = "3px solid white"
-//     } else {
-//         body.classList.add("light-mode")
-//         body.classList.remove("dark-mode")
-//         section.style.backgroundColor = "white"
-//         section.style.color = "black"
-//         section.style.border = "3px solid black"
-//     }
-
-// })
+// === INIT ===
+resultText.classList.add("placeholder");
+renderHistory();
+updateStats();
