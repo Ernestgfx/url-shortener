@@ -1,162 +1,423 @@
-/* === RESET & BASE === */
+/* =====================================================
+   FILE: style.css
+   PURPOSE: All visual design for the ERNEST URL Shortener app.
+
+   This file controls HOW everything LOOKS — colors, spacing,
+   fonts, animations, layout, and responsiveness.
+   It contains NO logic. Logic lives in java.js.
+   Structure (HTML elements) lives in index.html.
+
+   HOW CSS VARIABLES WORK IN THIS FILE:
+   All colors, sizes, and transitions are defined as variables
+   (--accent, --bg, --radius, etc.) inside :root at the top.
+   Every other rule references them using var(--name).
+   This means changing one variable updates the entire design.
+
+   HOW THEMING WORKS:
+   The default styles are dark mode.
+   When java.js adds the class "light" to <body>,
+   the "body.light { ... }" block overrides only the color
+   variables — everything else (layout, fonts, radius) stays the same.
+
+   SHRTNR — URL Shortener
+   style.css — All visual styling for the app
+
+   Structure of this file (in order):
+   1.  CSS Reset
+   2.  CSS Custom Properties (variables / design tokens)
+   3.  Light mode overrides
+   4.  Custom scrollbar
+   5.  Base body styles
+   6.  Background orbs
+   7.  Main layout wrapper
+   8.  Reveal animation (scroll/load fade-in)
+   9.  Header + logo
+   10. Theme toggle switch
+   11. Hero section
+   12. Main card
+   13. Input field
+   14. Buttons (primary, ghost, icon)
+   15. Result box
+   16. Toast notification
+   17. QR modal
+   18. History section
+   19. Stats bar
+   20. Footer
+   21. Responsive breakpoints (media queries)
+===================================================== */
+
+
+/* =====================================================
+   1. CSS RESET
+   By default, browsers add their own margin and padding
+   to elements (e.g. <h1>, <p>, <ul> all have spacing).
+   This reset wipes all of that out so we start from zero
+   and control every single measurement ourselves.
+
+   * → applies to ALL elements
+   *::before and *::after → also targets CSS pseudo-elements
+   box-sizing: border-box → padding and borders are included
+   INSIDE the declared width/height, not added on top.
+   Without border-box, a 200px wide element with 10px padding
+   would actually be 220px wide — unpredictable and annoying.
+===================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+
+/* =====================================================
+   2. CSS CUSTOM PROPERTIES (Design Tokens)
+   Defined on :root so they are accessible globally
+   on every element in the document.
+
+   Think of these like variables in JavaScript:
+   --accent: #64d2be  →  the main teal brand color
+   Usage: color: var(--accent);
+
+   By centralising all colors, spacing, and values here,
+   changing the theme is a one-line edit, not a search
+   across hundreds of CSS rules.
+===================================================== */
 :root {
-  --bg: #0a0a12;
-  --surface: rgba(255,255,255,0.04);
-  --surface-hover: rgba(255,255,255,0.07);
-  --border: rgba(255,255,255,0.08);
-  --border-accent: rgba(99,202,183,0.4);
-  --text: #e8eaf0;
-  --text-muted: rgba(232,234,240,0.45);
-  --accent: #63cab7;
-  --accent2: #a78bfa;
-  --accent3: #f472b6;
-  --danger: #f87171;
-  --card-bg: rgba(255,255,255,0.04);
-  --glass-blur: blur(20px);
-  --radius: 1.25rem;
-  --radius-sm: 0.75rem;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --shadow-glow: 0 0 40px rgba(99,202,183,0.15);
+  /* BACKGROUND COLORS */
+  --bg: #0a0a12;                          /* Main page background — deep dark navy */
+  --surface: rgba(255,255,255,0.04);      /* Glass surface for cards and inputs — very subtle white tint */
+  --surface-hover: rgba(255,255,255,0.07);/* Slightly brighter surface on hover */
+  --card-bg: rgba(255,255,255,0.04);      /* Card/panel background, same as surface */
+
+  /* BORDER COLORS */
+  --border: rgba(255,255,255,0.08);       /* Default border — barely visible white */
+  --border-accent: rgba(99,202,183,0.4);  /* Teal-tinted border, used on focused/active elements */
+
+  /* TEXT COLORS */
+  --text: #e8eaf0;                        /* Primary text — near white for readability on dark bg */
+  --text-muted: rgba(232,234,240,0.45);   /* Secondary/subdued text — timestamps, labels, placeholders */
+
+  /* BRAND ACCENT COLORS */
+  --accent: #63cab7;                      /* Main teal — used for links, active states, stat numbers */
+  --accent2: #a78bfa;                     /* Purple — used in toggle knob, gradient highlights */
+  --accent3: #f472b6;                     /* Pink — background orb 3, decorative accents */
+
+  /* GLASSMORPHISM EFFECT */
+  --glass-blur: blur(20px);              /* Backdrop blur for frosted-glass panels */
+
+  /* BORDER RADIUS (corner rounding) */
+  --radius: 1.25rem;                      /* Large radius for cards and modals */
+  --radius-sm: 0.75rem;                   /* Smaller radius for inputs, buttons, history items */
+
+  /* TYPOGRAPHY — font families */
+  --font-display: 'Syne', sans-serif;     /* Bold display font — used for hero title */
+  --font-mono: 'Space Mono', monospace;   /* Monospace font — used for URLs, labels, counters */
+
+  /* VISUAL DEPTH */
+  --shadow-glow: 0 0 40px rgba(99,202,183,0.15); /* Soft teal glow under the main card */
+
+  /* TRANSITION TIMING — used for smooth hover/state animations */
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* cubic-bezier is a custom easing curve:
+     0.4, 0   → starts slow
+     0.2, 1   → decelerates at the end (ease-out feel)
+     This feels more natural than linear or ease */
 }
 
-/* Light mode */
+
+/* =====================================================
+   3. LIGHT MODE OVERRIDES
+   When the user toggles to light mode, JavaScript adds
+   the class "light" to <body>.
+   This rule overrides the :root variables — only the
+   variables that need to change are listed here.
+   The rest (accent colors, fonts, radius) stay the same.
+===================================================== */
 body.light {
-  --bg: #f0f0f6;
-  --surface: rgba(255,255,255,0.7);
-  --surface-hover: rgba(255,255,255,0.9);
-  --border: rgba(0,0,0,0.08);
-  --border-accent: rgba(99,202,183,0.5);
-  --text: #1a1a2e;
-  --text-muted: rgba(26,26,46,0.5);
-  --card-bg: rgba(255,255,255,0.8);
-  --shadow-glow: 0 0 40px rgba(99,202,183,0.2);
+  --bg: #f0f0f6;                          /* Light grey page background */
+  --surface: rgba(255,255,255,0.7);       /* Mostly opaque white for inputs/cards */
+  --surface-hover: rgba(255,255,255,0.9); /* Near-opaque white on hover */
+  --border: rgba(0,0,0,0.08);             /* Very faint black border */
+  --border-accent: rgba(99,202,183,0.5);  /* Teal border, slightly more visible on light bg */
+  --text: #1a1a2e;                        /* Dark navy text for high contrast */
+  --text-muted: rgba(26,26,46,0.5);       /* Muted version of the dark text */
+  --card-bg: rgba(255,255,255,0.8);       /* Translucent white card background */
+  --shadow-glow: 0 0 40px rgba(99,202,183,0.2); /* Slightly stronger glow on light bg */
 }
 
+
+/* =====================================================
+   4. CUSTOM SCROLLBAR
+   Browsers allow styling the scrollbar in webkit browsers
+   (Chrome, Edge, Safari) using ::-webkit-scrollbar selectors.
+   This makes the scrollbar match the dark aesthetic
+   instead of showing the default grey OS scrollbar.
+===================================================== */
+::-webkit-scrollbar {
+  width: 5px; /* Slim 5px scrollbar instead of the default ~15px */
+}
+::-webkit-scrollbar-track {
+  background: transparent; /* The track behind the scroll thumb is invisible */
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border); /* The draggable part uses the border color */
+  border-radius: 99px;       /* Fully rounded ends for a pill shape */
+}
+
+
+/* =====================================================
+   5. BASE BODY STYLES
+   Applied to the entire page. Sets the default font,
+   background color, text color, and scroll behavior.
+===================================================== */
 body {
-  font-family: var(--font-display);
-  background-color: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family: var(--font-display);   /* Default font: Syne for all text unless overridden */
+  background-color: var(--bg);        /* Deep dark navy background */
+  color: var(--text);                 /* Near-white text by default */
+  min-height: 100vh;                  /* At minimum, fill the full viewport height */
+  overflow-x: hidden;                 /* Prevent horizontal scroll caused by orbs/animations */
   transition: background-color var(--transition), color var(--transition);
+  /* Smooth crossfade when switching between dark and light mode */
 }
 
-/* === ANIMATED BACKGROUND === */
+
+/* =====================================================
+   6. BACKGROUND ORBS
+   Three large, soft-blurred circular divs that float
+   behind all content and create atmosphere.
+
+   They work by:
+   - position: fixed → stay in place as the user scrolls
+   - z-index: 0      → sit behind z-index: 1 content
+   - filter: blur()  → blurs the circle into a soft glow
+   - pointer-events: none → invisible to clicks/touch
+   - animation       → slowly drift using CSS keyframes
+===================================================== */
 .bg-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.18;
-  pointer-events: none;
-  z-index: 0;
+  position: fixed;          /* Stays anchored to the viewport — doesn't scroll */
+  border-radius: 50%;       /* Makes the square div a circle */
+  filter: blur(80px);       /* Heavy blur = soft glowing effect */
+  opacity: 0.18;            /* Low opacity so content above stays readable */
+  pointer-events: none;     /* Completely unclickable — passes events through */
+  z-index: 0;               /* Behind everything */
   animation: drift 12s ease-in-out infinite alternate;
+  /* "alternate" reverses the animation direction every cycle
+     so orbs smoothly float back and forth instead of snapping */
 }
-.orb1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; animation-delay: 0s; }
-.orb2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; right: -80px; animation-delay: -4s; }
-.orb3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -8s; }
 
+/* Each orb has unique: size, color, position, and animation timing */
+.orb1 {
+  width: 500px; height: 500px;
+  background: var(--accent);    /* Teal orb */
+  top: -150px; left: -100px;    /* Partially off-screen top-left */
+  animation-delay: 0s;
+}
+.orb2 {
+  width: 400px; height: 400px;
+  background: var(--accent2);   /* Purple/violet orb */
+  bottom: -100px; right: -80px; /* Partially off-screen bottom-right */
+  animation-delay: -4s;         /* Negative delay starts mid-animation — offset from orb1 */
+}
+.orb3 {
+  width: 300px; height: 300px;
+  background: var(--accent3);   /* Pink orb */
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%); /* Centered on the page */
+  animation-delay: -8s;             /* Further offset — all three drift out of sync */
+}
+
+/* The drift animation: each orb floats to a new position then returns */
 @keyframes drift {
-  0% { transform: translate(0,0) scale(1); }
+  0%   { transform: translate(0, 0) scale(1); }
   100% { transform: translate(40px, 30px) scale(1.1); }
+  /* Moves 40px right, 30px down, and grows 10% over the animation duration.
+     "alternate" makes it return to 0% smoothly — creating an endless float loop. */
 }
 
-/* === LAYOUT === */
+
+/* =====================================================
+   7. MAIN LAYOUT WRAPPER
+   Centers all content horizontally and stacks children
+   vertically with consistent spacing.
+===================================================== */
 .main {
-  position: relative;
-  z-index: 1;
-  max-width: 700px;
-  margin: 0 auto;
+  position: relative; /* Required so z-index works — sits above orbs */
+  z-index: 1;         /* Above the background orbs (z-index: 0) */
+  max-width: 700px;   /* Content never stretches wider than 700px */
+  margin: 0 auto;     /* Centers the column horizontally on wide screens */
   padding: 2rem 1.5rem 4rem;
+  /* top: 2rem | left+right: 1.5rem | bottom: 4rem (extra space at bottom) */
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  flex-direction: column; /* Stack all children (header, hero, card...) vertically */
+  gap: 2rem;              /* 2rem of space between each section */
 }
 
-/* === HEADER === */
+
+/* =====================================================
+   8. REVEAL ANIMATION
+   Elements with class "reveal" start invisible and
+   slightly shifted downward. JavaScript adds the class
+   "visible" to each element on page load (staggered),
+   triggering a smooth fade-in + upward slide.
+
+   This is how the page "opens" with a cinematic feel
+   instead of everything just snapping into place.
+===================================================== */
+.reveal {
+  opacity: 0;                   /* Completely invisible to start */
+  transform: translateY(28px);  /* Shifted 28px downward to start */
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Both opacity and position transition over 0.7 seconds
+     with a smooth deceleration curve (ease-out-expo feel) */
+}
+.reveal.visible {
+  opacity: 1;              /* Fully visible */
+  transform: translateY(0); /* Back to natural position */
+}
+
+
+/* =====================================================
+   9. HEADER
+   Flexbox row: logo on the left, theme toggle on the right.
+===================================================== */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-between; /* Push logo to left, toggle to right */
+  align-items: center;            /* Vertically center both groups */
   padding: 0.5rem 0;
 }
 
+/* Logo: icon mark + text group side by side */
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.6rem; /* Space between icon mark and text group */
 }
 
+/* The square/rounded box that holds the ⌁ icon */
+.logo-mark {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  /* Diagonal gradient from teal to purple */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(99,202,183,0.3); /* Soft teal glow */
+  animation: logo-pulse 3s ease-in-out infinite;
+  /* Continuously pulses the glow intensity */
+}
+
+/* The glow pulse: box-shadow grows and shrinks on a 3s loop */
+@keyframes logo-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,202,183,0.3); }
+  50%       { box-shadow: 0 0 35px rgba(99,202,183,0.55), 0 0 60px rgba(99,202,183,0.15); }
+}
+
+/* The ⌁ symbol inside the mark */
 .logo-icon {
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   color: var(--accent);
   line-height: 1;
 }
 
-.logo-text {
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
+/* Stacks "SHRTNR" above "URL Shortener" */
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* "SHRTNR" — main app name */
+.logo-name {
+  font-family: var(--font-mono); /* Monospace gives it a techy, digital feel */
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.3em;         /* Wide letter spacing for a structured brand look */
   color: var(--accent);
 }
 
-/* Theme toggle */
+/* "URL Shortener" — subtitle */
+.logo-tag {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted); /* Subdued — secondary information */
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   10. THEME TOGGLE SWITCH
+   A custom-styled toggle built from a hidden checkbox
+   and a ::before pseudo-element that acts as the knob.
+   This avoids using any external libraries for the toggle.
+===================================================== */
+
+/* Outer container: sun icon + switch + moon icon in a row */
 .theme-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+/* The ☀ and ☾ icons on either side */
 .toggle-label {
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--text-muted); /* Muted so they don't compete with the main UI */
 }
 
+/* The clickable label that wraps the hidden input */
 .switch {
-  position: relative;
+  position: relative;        /* Required for absolutely-positioned ::before knob */
   display: inline-block;
-  width: 48px;
-  height: 26px;
+  width: 48px; height: 26px; /* Fixed toggle dimensions */
 }
 
-.switch input { opacity: 0; width: 0; height: 0; }
+/* Hide the actual <input type="checkbox"> — we only need its state */
+.switch input {
+  opacity: 0;
+  width: 0; height: 0;
+  /* Completely hidden but still focusable and keyboard-accessible */
+}
 
+/* The pill-shaped track (the toggle background) */
 .slider {
   position: absolute;
-  inset: 0;
+  inset: 0; /* Shorthand for top:0; right:0; bottom:0; left:0 — fills the label */
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 999px; /* Fully rounded = pill shape */
   cursor: pointer;
   transition: var(--transition);
 }
 
+/* The circular knob inside the toggle track */
 .slider::before {
-  content: '';
+  content: '';       /* ::before requires content, even if empty */
   position: absolute;
   width: 18px; height: 18px;
-  left: 3px; top: 3px;
-  background: var(--accent);
-  border-radius: 50%;
+  left: 3px; top: 3px;     /* 3px inset from the track edge */
+  background: var(--accent); /* Teal knob in dark mode */
+  border-radius: 50%;        /* Perfectly circular */
   transition: var(--transition);
 }
 
+/* When the checkbox is checked (dark mode ON), slide the knob to the right */
 .switch input:checked + .slider::before {
-  transform: translateX(22px);
-  background: var(--accent2);
+  transform: translateX(22px); /* Moves 22px to the right */
+  background: var(--accent2);  /* Knob turns purple in dark mode */
 }
 
-/* === HERO === */
-.hero { padding: 1rem 0; }
 
+/* =====================================================
+   11. HERO SECTION
+===================================================== */
+.hero {
+  padding: 1rem 0;
+}
+
+/* Small pill/tag above the headline */
 .hero-sub {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -166,35 +427,85 @@ body {
   margin-bottom: 0.75rem;
 }
 
+/* The large animated headline */
 .hero-title {
+  font-family: var(--font-display);  /* Syne — bold and distinctive */
   font-size: clamp(2.5rem, 8vw, 4.5rem);
+  /* clamp(min, preferred, max):
+     - Never smaller than 2.5rem
+     - Ideally 8% of viewport width (scales with screen size)
+     - Never larger than 4.5rem
+     This makes the headline naturally responsive. */
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 1.05;  /* Tight line height for a bold headline block */
   color: var(--text);
+  margin-bottom: 1rem;
 }
 
-.accent { color: var(--accent); }
+/* The blinking "|" cursor after the typed text */
+.cursor-blink {
+  color: var(--accent); /* Teal color to stand out */
+  animation: blink 1.1s step-end infinite;
+  /* step-end: snaps directly between opacity 1 and 0 (no fade)
+     This is what makes it look like a real terminal cursor */
+}
 
-/* === CARD === */
+/* Blinks the cursor on/off */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Description paragraph below the headline */
+.hero-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.65;    /* Generous line height for comfortable reading */
+  max-width: 480px;     /* Prevents the line from getting too wide */
+}
+
+/* The teal-colored word in the headline */
+.accent {
+  color: var(--accent);
+}
+
+
+/* =====================================================
+   12. MAIN CARD
+   The central frosted-glass panel containing the
+   input, buttons, and result.
+
+   Glassmorphism effect = semi-transparent background
+   + backdrop-filter blur (blurs whatever is behind it).
+===================================================== */
 .card {
-  background: var(--card-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--card-bg);                /* Very subtle semi-transparent background */
+  backdrop-filter: var(--glass-blur);        /* Blurs the orbs behind the card */
+  -webkit-backdrop-filter: var(--glass-blur);/* Safari prefix required for backdrop-filter */
+  border: 1px solid var(--border);           /* Faint border to define the card edge */
+  border-radius: var(--radius);              /* Rounded corners */
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.25rem;                              /* Space between input row, buttons, result box */
   box-shadow: var(--shadow-glow), 0 4px 40px rgba(0,0,0,0.3);
+  /* Two shadows:
+     1. var(--shadow-glow) → soft teal ambient glow
+     2. 0 4px 40px rgba(0,0,0,0.3) → realistic drop shadow beneath the card */
   transition: border-color var(--transition);
 }
 
+/* Card border glows teal when any element inside it is focused */
 .card:focus-within {
   border-color: var(--border-accent);
 }
 
-/* === INPUT === */
+
+/* =====================================================
+   13. URL INPUT FIELD
+===================================================== */
+
+/* Outer wrapper: row with icon + input + counter */
 .input-wrapper {
   display: flex;
   align-items: center;
@@ -206,39 +517,55 @@ body {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+/* Highlight the wrapper border and add a glow when the input is focused */
 .input-wrapper:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(99,202,183,0.12);
+  /* The 3px ring creates a focus indicator that's accessible
+     and visually clear without being jarring */
 }
 
-.input-icon { font-size: 1.1rem; flex-shrink: 0; }
+/* The chain-link icon on the left */
+.input-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0; /* Prevents the icon from being squished when input is long */
+}
 
+/* The text input field itself */
 .url-input {
-  flex: 1;
-  background: transparent;
+  flex: 1;              /* Takes all available horizontal space */
+  background: transparent; /* Inherits the wrapper background */
   border: none;
-  outline: none;
-  font-family: var(--font-mono);
+  outline: none;        /* Removes the default browser blue outline */
+  font-family: var(--font-mono); /* Monospace looks right for URLs */
   font-size: 0.875rem;
   color: var(--text);
-  min-width: 0;
+  min-width: 0;         /* Required in flex containers to allow the input to shrink */
 }
 
-.url-input::placeholder { color: var(--text-muted); }
+/* Placeholder text color — the ghost hint text */
+.url-input::placeholder {
+  color: var(--text-muted);
+}
 
+/* Live character count number on the right */
 .char-count {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-muted);
-  flex-shrink: 0;
+  flex-shrink: 0; /* Never squished by the input expanding */
 }
 
-/* === BUTTONS === */
-.actions {
-  display: flex;
-  gap: 0.75rem;
-}
 
+/* =====================================================
+   14. BUTTONS
+   Three button styles used throughout the app:
+   • .btn-primary → main action button (teal filled)
+   • .btn-ghost   → secondary action button (transparent)
+   • .icon-btn    → small vertical icon+label buttons in result box
+===================================================== */
+
+/* Shared base styles for all .btn elements */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -252,102 +579,68 @@ body {
   cursor: pointer;
   border: 1px solid transparent;
   transition: all var(--transition);
-  position: relative;
-  overflow: hidden;
+  position: relative; /* Needed for the ripple effect in JS to position correctly */
+  overflow: hidden;   /* Clips the ripple wave inside the button boundary */
   white-space: nowrap;
 }
 
+/* PRIMARY BUTTON: solid teal background */
 .btn-primary {
   background: var(--accent);
-  color: #0a0a12;
-  flex: 1;
+  color: #0a0a12; /* Dark text on teal bg — high contrast */
+  flex: 1;        /* Fills available width in the actions row */
 }
-
 .btn-primary:hover {
-  background: #7dd8c6;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99,202,183,0.35);
+  background: #7dd8c6;           /* Slightly lighter teal on hover */
+  transform: translateY(-1px);   /* Subtle lift effect */
+  box-shadow: 0 6px 20px rgba(99,202,183,0.35); /* Glow intensifies */
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.98); /* Presses back down on click */
 }
 
-.btn-primary:active { transform: translateY(0) scale(0.98); }
-
+/* GHOST BUTTON: transparent with a faint border */
 .btn-ghost {
   background: var(--surface);
   color: var(--text-muted);
   border-color: var(--border);
 }
-
 .btn-ghost:hover {
   background: var(--surface-hover);
   color: var(--text);
   border-color: rgba(255,255,255,0.15);
 }
 
-.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
+/* Small size variant used for "Clear All" in the history header */
+.btn-sm {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+}
 
+/* LOADING SPINNER — hidden by default */
 .btn-loader {
   display: none;
   width: 16px; height: 16px;
-  border: 2px solid rgba(10,10,18,0.3);
-  border-top-color: #0a0a12;
+  border: 2px solid rgba(10,10,18,0.3); /* Faint ring */
+  border-top-color: #0a0a12;            /* One side is solid = creates spinning arc */
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.7s linear infinite; /* Continuous rotation */
 }
 
+/* When JS adds class "loading" to the button: hide text/icon, show spinner */
 .btn.loading .btn-text,
 .btn.loading .btn-icon { display: none; }
 .btn.loading .btn-loader { display: block; }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* === RESULT BOX === */
-.result-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 1rem 1.25rem;
-  min-height: 72px;
-  transition: border-color var(--transition);
-  flex-wrap: wrap;
+/* The spinner rotation animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.result-box.has-url { border-color: rgba(99,202,183,0.3); }
-
-.result-left { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-
-.result-label {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
-
-.result-url {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--text);
-  text-decoration: none;
-  word-break: break-all;
-  transition: color var(--transition);
-}
-
-.result-url:hover { color: var(--accent); }
-.result-url.placeholder { color: var(--text-muted); font-style: italic; }
-
-.result-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
+/* ICON BUTTONS: small vertical stacked icon + label in result box */
 .icon-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Icon on top, label below */
   align-items: center;
   gap: 0.2rem;
   padding: 0.5rem 0.75rem;
@@ -361,79 +654,167 @@ body {
   cursor: pointer;
   transition: all var(--transition);
 }
-
 .icon-btn:hover {
   background: var(--surface-hover);
   color: var(--accent);
   border-color: var(--border-accent);
-  transform: translateY(-1px);
+  transform: translateY(-1px); /* Subtle lift */
+}
+.icon-btn:active {
+  transform: scale(0.95); /* Press-down effect */
 }
 
-.icon-btn:active { transform: scale(0.95); }
 
-/* === TOAST === */
+/* =====================================================
+   15. RESULT BOX
+   The output area that shows the shortened URL.
+   Uses flexbox to place the URL on the left and
+   the action buttons on the right.
+===================================================== */
+.result-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  min-height: 72px; /* Reserve consistent height even when content is short */
+  transition: border-color var(--transition);
+  flex-wrap: wrap;  /* Wraps to multiple lines on narrow screens */
+}
+
+/* Border turns teal when a real URL is loaded */
+.result-box.has-url {
+  border-color: rgba(99,202,183,0.3);
+}
+
+/* Left column: label + URL */
+.result-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0; /* Allows text-overflow: ellipsis to work in flex children */
+}
+
+/* "OUTPUT" label above the URL */
+.result-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+/* The short URL displayed as a clickable link */
+.result-url {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+  word-break: break-all; /* Allows long URLs to wrap instead of overflowing */
+  transition: color var(--transition);
+}
+.result-url:hover {
+  color: var(--accent); /* Turns teal on hover */
+}
+
+/* Muted/italic styling when no URL exists yet */
+.result-url.placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Right column: Copy / QR / Open buttons */
+.result-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0; /* These buttons never get squished */
+}
+
+
+/* =====================================================
+   16. TOAST NOTIFICATION
+   A fixed-position pill message that appears at the bottom.
+   Transitions from invisible+shifted to visible+normal position.
+===================================================== */
 .toast {
   position: fixed;
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: var(--accent);
-  color: #0a0a12;
+  /* translateX(-50%) centers it horizontally relative to left:50%
+     translateY(20px) shifts it slightly downward (pre-animation state) */
+  background: var(--accent);      /* Teal pill background */
+  color: #0a0a12;                 /* Dark text on teal */
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   padding: 0.6rem 1.25rem;
-  border-radius: 999px;
-  opacity: 0;
-  pointer-events: none;
+  border-radius: 999px;           /* Fully rounded pill shape */
+  opacity: 0;                     /* Invisible by default */
+  pointer-events: none;           /* Can't be clicked when hidden */
   transition: all 0.3s ease;
-  z-index: 100;
-  white-space: nowrap;
+  z-index: 100;                   /* Above all other content */
+  white-space: nowrap;            /* Message stays on one line */
 }
 
+/* When JS adds "show" class: slides up and fades in */
 .toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0); /* Back to natural vertical position */
 }
 
-/* === QR MODAL === */
+
+/* =====================================================
+   17. QR CODE MODAL
+===================================================== */
+
+/* Full-screen semi-transparent overlay — covers everything */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(8px);
+  inset: 0;                         /* Covers top/right/bottom/left — full screen */
+  background: rgba(0,0,0,0.7);      /* 70% opaque black */
+  backdrop-filter: blur(8px);       /* Blurs the page content behind the modal */
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 200;
-  opacity: 0;
-  pointer-events: none;
+  justify-content: center;          /* Centers the modal box in the viewport */
+  z-index: 200;                     /* Above everything else on the page */
+  opacity: 0;                       /* Hidden by default */
+  pointer-events: none;             /* Unclickable when hidden */
   transition: opacity 0.3s ease;
 }
 
+/* When JS adds "show": modal overlay becomes visible and interactive */
 .modal-overlay.show {
   opacity: 1;
   pointer-events: all;
 }
 
+/* The modal box itself */
 .modal {
-  background: #13131f;
-  border: 1px solid var(--border-accent);
+  background: #13131f;              /* Slightly lighter dark than the page bg */
+  border: 1px solid var(--border-accent); /* Teal border for focus */
   border-radius: var(--radius);
   padding: 2rem;
-  width: min(400px, 90vw);
+  width: min(400px, 90vw);          /* Max 400px wide, but never more than 90% of viewport */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
-  box-shadow: 0 0 60px rgba(99,202,183,0.2);
-  transform: scale(0.95);
+  box-shadow: 0 0 60px rgba(99,202,183,0.2); /* Ambient teal glow around the modal */
+  transform: scale(0.95);           /* Starts slightly scaled down */
   transition: transform 0.3s ease;
 }
 
-.modal-overlay.show .modal { transform: scale(1); }
+/* When overlay shows, the modal scales up to full size */
+.modal-overlay.show .modal {
+  transform: scale(1);
+}
 
+/* Modal top bar: "QR Code" title + ✕ close button side by side */
 .modal-header {
   width: 100%;
   display: flex;
@@ -443,6 +824,7 @@ body {
   font-size: 1.1rem;
 }
 
+/* The ✕ close button */
 .modal-close {
   background: none;
   border: none;
@@ -455,35 +837,55 @@ body {
 }
 .modal-close:hover { color: var(--text); }
 
+/* White container for the QR canvas — required for QR readability */
 .qr-container {
-  background: white;
+  background: white;    /* QR codes need a white background to scan correctly */
   padding: 1rem;
   border-radius: 0.75rem;
 }
+.qr-container canvas { display: block; } /* Removes default inline spacing */
 
-.qr-container canvas { display: block; }
-
+/* The short URL shown as text below the QR image */
 .modal-url {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--accent);
   text-align: center;
-  word-break: break-all;
+  word-break: break-all; /* Wraps long URLs */
 }
 
-/* === HISTORY === */
+/* Side-by-side Download + Copy buttons at the bottom of the modal */
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+}
+.modal-actions .btn { flex: 1; } /* Each button takes equal width */
+
+
+/* =====================================================
+   18. HISTORY SECTION
+===================================================== */
+
 .history-section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+/* Header row: title + count badge on the left, "Clear All" on the right */
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.history-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
 
+/* "RECENT LINKS" label */
 .history-title {
   font-size: 1rem;
   font-weight: 700;
@@ -492,22 +894,52 @@ body {
   text-transform: uppercase;
 }
 
+/* Small teal pill showing the count of history items */
+.history-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: rgba(99,202,183,0.1); /* Faint teal background */
+  color: var(--accent);
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  border: 1px solid rgba(99,202,183,0.2);
+}
+
+/* Container for the dynamically generated history items */
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.625rem; /* Spacing between each history item card */
 }
 
+/* Empty state: shown when no history exists */
 .history-empty {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--text-muted);
   text-align: center;
   padding: 1.5rem;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--border); /* Dashed border = "placeholder/empty" convention */
   border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
 }
 
+/* The ⌁ icon in the empty state floats up and down */
+.empty-icon {
+  font-size: 1.75rem;
+  opacity: 0.4;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); } /* Floats 6px upward at midpoint */
+}
+
+/* Each individual history item card — created by JavaScript */
 .history-item {
   display: flex;
   align-items: center;
@@ -517,29 +949,21 @@ body {
   border-radius: var(--radius-sm);
   padding: 0.875rem 1rem;
   animation: slideIn 0.35s ease forwards;
+  /* "forwards" keeps the end state — items stay visible after animating in */
   transition: border-color var(--transition), transform var(--transition);
 }
-
 .history-item:hover {
-  border-color: var(--border-accent);
-  transform: translateX(3px);
+  border-color: var(--border-accent);   /* Border glows teal on hover */
+  transform: translateX(3px);           /* Subtle rightward nudge on hover */
 }
 
+/* Slide-in animation: items appear from the left */
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-.history-item-icon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.history-item-content {
-  flex: 1;
-  min-width: 0;
-}
-
+/* Short URL link inside each history item */
 .history-short {
   display: block;
   font-family: var(--font-mono);
@@ -548,11 +972,11 @@ body {
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; /* Shows "..." if the URL is too long for the container */
 }
-
 .history-short:hover { text-decoration: underline; }
 
+/* The original long URL shown below the short URL */
 .history-original {
   display: block;
   font-size: 0.7rem;
@@ -564,13 +988,15 @@ body {
   margin-top: 0.2rem;
 }
 
+/* Time ago label: "just now", "5m ago" etc. */
 .history-time {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-muted);
-  flex-shrink: 0;
+  flex-shrink: 0; /* Never gets squeezed */
 }
 
+/* Copy icon button at the end of each history item */
 .history-copy {
   background: none;
   border: none;
@@ -583,10 +1009,17 @@ body {
   transition: all var(--transition);
   flex-shrink: 0;
 }
+.history-copy:hover {
+  color: var(--accent);
+  background: var(--surface);
+}
 
-.history-copy:hover { color: var(--accent); background: var(--surface); }
 
-/* === STATS BAR === */
+/* =====================================================
+   19. STATS BAR
+   Three stat blocks arranged in a horizontal row,
+   separated by thin vertical dividers.
+===================================================== */
 .stats-bar {
   display: flex;
   align-items: center;
@@ -596,9 +1029,10 @@ body {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur); /* Glassmorphism effect */
 }
 
+/* Each individual stat: number stacked above label */
 .stat {
   display: flex;
   flex-direction: column;
@@ -606,14 +1040,16 @@ body {
   gap: 0.25rem;
 }
 
+/* The animated counter number */
 .stat-num {
   font-family: var(--font-mono);
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent); /* Teal number — stands out */
   line-height: 1;
 }
 
+/* The label below the number */
 .stat-label {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -621,35 +1057,80 @@ body {
   color: var(--text-muted);
 }
 
+/* Thin vertical line between stat blocks */
 .stat-divider {
   width: 1px;
   height: 36px;
   background: var(--border);
 }
 
-/* === FOOTER === */
+
+/* =====================================================
+   20. FOOTER
+===================================================== */
 .footer {
   text-align: center;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-muted);
   padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem; /* Space between "Built by Ernest" · "Powered by TinyURL" */
 }
 
-/* === RESPONSIVE === */
+/* The · separator dot between footer items */
+.footer-sep {
+  color: var(--border);
+}
+
+
+/* =====================================================
+   21. RESPONSIVE BREAKPOINTS
+   Media queries adjust the layout at specific screen widths.
+   CSS reads these top-to-bottom, so more specific
+   (narrower) breakpoints override wider ones.
+===================================================== */
+
+/* TABLET AND SMALL DESKTOP: 600px and below */
 @media (max-width: 600px) {
-  .main { padding: 1.25rem 1rem 3rem; gap: 1.5rem; }
+  .main {
+    padding: 1.25rem 1rem 3rem;
+    gap: 1.5rem; /* Tighter spacing on smaller screens */
+  }
   .card { padding: 1.25rem; }
-  .hero-title { font-size: 2.2rem; }
-  .actions { flex-direction: column; }
-  .result-box { flex-direction: column; align-items: flex-start; }
-  .result-actions { width: 100%; justify-content: flex-end; }
-  .stats-bar { gap: 1rem; padding: 1rem; }
+
+  .hero-title { font-size: 2.2rem; } /* Smaller headline on narrow screens */
+
+  .actions {
+    flex-direction: column; /* Stack Shorten + Clear buttons vertically */
+  }
+
+  .result-box {
+    flex-direction: column;      /* Stack URL and action buttons vertically */
+    align-items: flex-start;
+  }
+  .result-actions {
+    width: 100%;
+    justify-content: flex-end; /* Push Copy/QR/Open buttons to the right */
+  }
+
+  .stats-bar {
+    gap: 1rem;
+    padding: 1rem;
+  }
   .stat-num { font-size: 1.2rem; }
 }
 
+/* MOBILE PHONES: 380px and below */
 @media (max-width: 380px) {
   .history-time { display: none; }
+  /* Hide timestamps — not enough space on very small screens */
+
   .icon-btn span { display: none; }
+  /* Hide text labels on icon buttons — only show the icons */
+
   .icon-btn { padding: 0.5rem; }
+  /* Tighter padding when labels are hidden */
 }
