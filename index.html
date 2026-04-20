@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERNEST — URL Shortener</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Animated background orbs -->
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <main class="main">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">⌁</span>
+        <span class="logo-text">ERNEST</span>
+      </div>
+      <div class="theme-toggle">
+        <span class="toggle-label">☀</span>
+        <label class="switch" for="mode">
+          <input type="checkbox" id="mode">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">☾</span>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <p class="hero-sub">Make your links short, sharp, and shareable</p>
+      <h1 class="hero-title">Shorten.<br><span class="accent">Share.</span><br>Track.</h1>
+    </section>
+
+    <!-- Card -->
+    <section class="card">
+
+      <!-- Input Row -->
+      <div class="input-wrapper">
+        <span class="input-icon">🔗</span>
+        <input class="url-input" type="url" id="get-url-input" placeholder="Paste your long URL here..." autocomplete="off">
+        <span class="char-count" id="char-count">0</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" id="shorten-btn">
+          <span class="btn-text">Shorten</span>
+          <span class="btn-icon">→</span>
+          <span class="btn-loader" id="btn-loader"></span>
+        </button>
+        <button class="btn btn-ghost" id="clear-btn">Clear</button>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="result-box">
+        <div class="result-left">
+          <span class="result-label">SHORTENED URL</span>
+          <a class="result-url" id="result-text" href="#" target="_blank">—</a>
+        </div>
+        <div class="result-actions">
+          <button class="icon-btn" id="copy-btn" title="Copy URL">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy</span>
+          </button>
+          <button class="icon-btn" id="qr-btn" title="QR Code">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="5" y="5" width="3" height="3" fill="currentColor"/><rect x="16" y="5" width="3" height="3" fill="currentColor"/><rect x="5" y="16" width="3" height="3" fill="currentColor"/></svg>
+            <span>QR</span>
+          </button>
+          <button class="icon-btn" id="open-btn" title="Open URL">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>Open</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+
+    </section>
+
+    <!-- QR Modal -->
+    <div class="modal-overlay" id="qr-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <span>QR Code</span>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div id="qr-container" class="qr-container"></div>
+        <p class="modal-url" id="modal-url"></p>
+        <button class="btn btn-primary" id="download-qr">Download QR</button>
+      </div>
+    </div>
+
+    <!-- History -->
+    <section class="history-section" id="history-section">
+      <div class="history-header">
+        <h2 class="history-title">Recent Links</h2>
+        <button class="btn btn-ghost btn-sm" id="clear-history-btn">Clear All</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
+      <p class="history-empty" id="history-empty">No links shortened yet. Go ahead — paste your first URL!</p>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-bar">
+      <div class="stat">
+        <span class="stat-num" id="stat-count">0</span>
+        <span class="stat-label">Links</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" id="stat-saved">0</span>
+        <span class="stat-label">Chars saved</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" id="stat-session">0</span>
+        <span class="stat-label">This session</span>
+      </div>
+    </section>
+
+    <footer class="footer">Built By <span class="accent">⌁</span> ERNEST</footer>
+  </main>
+
+  <script src="java.js"></script>
+</body>
+</html>
