@@ -1,135 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERNEST — URL Shortener</title>
+  <meta charset="UTF-8"> <!-- Specifies character encoding to support all Unicode characters -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile devices -->
+  <title>ERNEST — URL Shortener</title> <!-- Browser tab title -->
+  
+  <!-- Preconnect for faster Google Fonts loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  
+  <!-- Import custom fonts: Space Mono (monospace for technical feel) and Syne (modern display font) -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Link to external stylesheet for all visual styling -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Animated background orbs -->
-  <div class="bg-orb orb1"></div>
-  <div class="bg-orb orb2"></div>
-  <div class="bg-orb orb3"></div>
+  <!-- ANIMATED BACKGROUND ORBS -->
+  <!-- Three decorative floating circles that create a modern, dynamic background -->
+  <div class="bg-orb orb1"></div> <!-- Orb 1 - positioned and animated via CSS -->
+  <div class="bg-orb orb2"></div> <!-- Orb 2 - different animation delay/size -->
+  <div class="bg-orb orb3"></div> <!-- Orb 3 - creates depth and visual interest -->
 
+  <!-- MAIN CONTENT CONTAINER -->
+  <!-- Wraps all visible content and provides layout structure -->
   <main class="main">
 
-    <!-- Header -->
+    <!-- HEADER SECTION -->
+    <!-- Contains logo and theme toggle switch -->
     <header class="header">
+      <!-- Logo area with icon and brand name -->
       <div class="logo">
-        <span class="logo-icon">⌁</span>
-        <span class="logo-text">ERNEST</span>
+        <span class="logo-icon">⌁</span> <!-- Electric wave symbol as brand icon -->
+        <span class="logo-text">ERNEST</span> <!-- Brand name -->
       </div>
+      
+      <!-- Dark/Light Theme Toggle Component -->
       <div class="theme-toggle">
-        <span class="toggle-label">☀</span>
-        <label class="switch" for="mode">
-          <input type="checkbox" id="mode">
-          <span class="slider"></span>
+        <span class="toggle-label">☀</span> <!-- Sun icon for light mode indicator -->
+        <label class="switch" for="mode"> <!-- Custom toggle switch container -->
+          <input type="checkbox" id="mode"> <!-- Checkbox toggles between themes -->
+          <span class="slider"></span> <!-- Visual slider element -->
         </label>
-        <span class="toggle-label">☾</span>
+        <span class="toggle-label">☾</span> <!-- Moon icon for dark mode indicator -->
       </div>
     </header>
 
-    <!-- Hero -->
+    <!-- HERO SECTION -->
+    <!-- Main heading area with catchy tagline -->
     <section class="hero">
-      <p class="hero-sub">Make your links short, sharp, and shareable</p>
-      <h1 class="hero-title">Shorten.<br><span class="accent">Share.</span><br>Track.</h1>
+      <p class="hero-sub">Make your links short, sharp, and shareable</p> <!-- Subtitle describing the service -->
+      <h1 class="hero-title">Shorten.<br><span class="accent">Share.</span><br>Track.</h1> <!-- Main headline with accent color on "Share" -->
     </section>
 
-    <!-- Card -->
+    <!-- CARD SECTION - MAIN INTERACTION AREA -->
+    <!-- Contains the core URL shortening functionality -->
     <section class="card">
 
-      <!-- Input Row -->
+      <!-- URL INPUT ROW -->
       <div class="input-wrapper">
-        <span class="input-icon">🔗</span>
+        <span class="input-icon">🔗</span> <!-- Link icon visual indicator -->
         <input class="url-input" type="url" id="get-url-input" placeholder="Paste your long URL here..." autocomplete="off">
-        <span class="char-count" id="char-count">0</span>
+        <!-- URL input field: type="url" provides basic validation, autocomplete off prevents browser suggestions -->
+        <span class="char-count" id="char-count">0</span> <!-- Displays current character count of input URL -->
       </div>
 
-      <!-- Actions -->
+      <!-- ACTION BUTTONS ROW -->
       <div class="actions">
+        <!-- Primary Shorten Button -->
         <button class="btn btn-primary" id="shorten-btn">
-          <span class="btn-text">Shorten</span>
-          <span class="btn-icon">→</span>
-          <span class="btn-loader" id="btn-loader"></span>
+          <span class="btn-text">Shorten</span> <!-- Button text -->
+          <span class="btn-icon">→</span> <!-- Arrow icon indicating action -->
+          <span class="btn-loader" id="btn-loader"></span> <!-- Hidden spinner that appears during loading -->
         </button>
+        
+        <!-- Secondary Clear Button - resets the input field -->
         <button class="btn btn-ghost" id="clear-btn">Clear</button>
       </div>
 
-      <!-- Result -->
+      <!-- RESULT DISPLAY AREA -->
+      <!-- Shows the shortened URL after successful generation -->
       <div class="result-box" id="result-box">
+        <!-- Left side - URL display -->
         <div class="result-left">
-          <span class="result-label">SHORTENED URL</span>
-          <a class="result-url" id="result-text" href="#" target="_blank">—</a>
+          <span class="result-label">SHORTENED URL</span> <!-- Label for the result area -->
+          <a class="result-url" id="result-text" href="#" target="_blank">—</a> <!-- Clickable link to the shortened URL -->
         </div>
+        
+        <!-- Right side - Action buttons for the shortened URL -->
         <div class="result-actions">
+          <!-- Copy button - copies shortened URL to clipboard -->
           <button class="icon-btn" id="copy-btn" title="Copy URL">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg> <!-- Copy icon SVG -->
             <span>Copy</span>
           </button>
+          
+          <!-- QR button - generates and displays QR code for the shortened URL -->
           <button class="icon-btn" id="qr-btn" title="QR Code">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="5" y="5" width="3" height="3" fill="currentColor"/><rect x="16" y="5" width="3" height="3" fill="currentColor"/><rect x="5" y="16" width="3" height="3" fill="currentColor"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="3" height="3"/>
+              <rect x="18" y="18" width="3" height="3"/>
+              <rect x="14" y="18" width="3" height="3"/>
+              <rect x="18" y="14" width="3" height="3"/>
+              <rect x="5" y="5" width="3" height="3" fill="currentColor"/>
+              <rect x="16" y="5" width="3" height="3" fill="currentColor"/>
+              <rect x="5" y="16" width="3" height="3" fill="currentColor"/>
+            </svg> <!-- QR code icon SVG -->
             <span>QR</span>
           </button>
+          
+          <!-- Open button - opens the shortened URL in a new tab -->
           <button class="icon-btn" id="open-btn" title="Open URL">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg> <!-- External link/open icon -->
             <span>Open</span>
           </button>
         </div>
       </div>
 
-      <!-- Toast -->
+      <!-- TOAST NOTIFICATION -->
+      <!-- Temporary popup message for user feedback (e.g., "Copied!", "Error!") -->
       <div class="toast" id="toast"></div>
 
     </section>
 
-    <!-- QR Modal -->
+    <!-- QR CODE MODAL -->
+    <!-- Popup overlay that appears when QR button is clicked -->
     <div class="modal-overlay" id="qr-modal">
       <div class="modal">
         <div class="modal-header">
-          <span>QR Code</span>
-          <button class="modal-close" id="modal-close">✕</button>
+          <span>QR Code</span> <!-- Modal title -->
+          <button class="modal-close" id="modal-close">✕</button> <!-- Close button -->
         </div>
-        <div id="qr-container" class="qr-container"></div>
-        <p class="modal-url" id="modal-url"></p>
-        <button class="btn btn-primary" id="download-qr">Download QR</button>
+        <div id="qr-container" class="qr-container"></div> <!-- Container where QR code image is rendered -->
+        <p class="modal-url" id="modal-url"></p> <!-- Displays the URL encoded in the QR code -->
+        <button class="btn btn-primary" id="download-qr">Download QR</button> <!-- Button to save QR code as image -->
       </div>
     </div>
 
-    <!-- History -->
+    <!-- HISTORY SECTION -->
+    <!-- Displays all previously shortened URLs in this session -->
     <section class="history-section" id="history-section">
       <div class="history-header">
-        <h2 class="history-title">Recent Links</h2>
-        <button class="btn btn-ghost btn-sm" id="clear-history-btn">Clear All</button>
+        <h2 class="history-title">Recent Links</h2> <!-- Section title -->
+        <button class="btn btn-ghost btn-sm" id="clear-history-btn">Clear All</button> <!-- Button to delete all history -->
       </div>
-      <div class="history-list" id="history-list"></div>
-      <p class="history-empty" id="history-empty">No links shortened yet. Go ahead — paste your first URL!</p>
+      <div class="history-list" id="history-list"></div> <!-- Dynamic container where history items are inserted -->
+      <p class="history-empty" id="history-empty">No links shortened yet. Go ahead — paste your first URL!</p> <!-- Empty state message -->
     </section>
 
-    <!-- Stats -->
+    <!-- STATISTICS BAR -->
+    <!-- Displays metrics about URL shortening usage -->
     <section class="stats-bar">
       <div class="stat">
-        <span class="stat-num" id="stat-count">0</span>
+        <span class="stat-num" id="stat-count">0</span> <!-- Total number of links shortened -->
         <span class="stat-label">Links</span>
       </div>
-      <div class="stat-divider"></div>
+      <div class="stat-divider"></div> <!-- Visual separator -->
       <div class="stat">
-        <span class="stat-num" id="stat-saved">0</span>
+        <span class="stat-num" id="stat-saved">0</span> <!-- Total characters saved (original length - shortened length) -->
         <span class="stat-label">Chars saved</span>
       </div>
-      <div class="stat-divider"></div>
+      <div class="stat-divider"></div> <!-- Visual separator -->
       <div class="stat">
-        <span class="stat-num" id="stat-session">0</span>
+        <span class="stat-num" id="stat-session">0</span> <!-- Number of links shortened in current browser session -->
         <span class="stat-label">This session</span>
       </div>
     </section>
 
+    <!-- FOOTER -->
+    <!-- Simple attribution footer -->
     <footer class="footer">Built By <span class="accent">⌁</span> ERNEST</footer>
   </main>
 
+  <!-- EXTERNAL JAVASCRIPT -->
+  <!-- Contains all interactive functionality: URL shortening, localStorage, QR generation, theme toggling, etc. -->
   <script src="java.js"></script>
 </body>
 </html>
